@@ -25,10 +25,13 @@ public class ApiManager {
     }
 
     private void init(){
-
+        OkHttpClient client = new OkHttpClient.Builder()
+                .addInterceptor(new CommonInterceptor())
+                .build();
         retrofit = new Retrofit.Builder()
                 .baseUrl(host)
                 .addConverterFactory(GsonConverterFactory.create())
+                .client(client)
                 .build();
     }
 

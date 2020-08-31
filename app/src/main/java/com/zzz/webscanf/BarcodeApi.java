@@ -5,6 +5,6 @@ import retrofit2.http.GET;
 import retrofit2.http.Query;
 
 public interface BarcodeApi {
-    @GET("barcode/goods/details")
+    @GET("api/barcode/goods/details")
     Call<BarcodeBean> getBarcode(@Query("barcode") String barcode);
 }
