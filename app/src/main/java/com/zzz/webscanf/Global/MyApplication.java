@@ -15,6 +15,7 @@ import org.litepal.crud.DataSupport;
 
 import java.util.List;
 
+import cn.bmob.v3.Bmob;
 import cn.bmob.v3.BmobQuery;
 import cn.bmob.v3.exception.BmobException;
 import cn.bmob.v3.listener.FindListener;
@@ -31,6 +32,7 @@ public class MyApplication extends Application {
     public void onCreate() {
         super.onCreate();
         Bugly.init(getApplicationContext(), "ec0cc0d600", false);
+        Bmob.initialize(this,"26141dcbac0c99a7ac9729c1a6731ea5");
         mContext=getApplicationContext();
         mHandle=new Handler();
         LitePal.initialize(mContext);
