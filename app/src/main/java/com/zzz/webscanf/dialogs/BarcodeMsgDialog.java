@@ -19,7 +19,6 @@ import com.zzz.webscanf.ApiManager;
 import com.zzz.webscanf.BarcodeApi;
 import com.zzz.webscanf.BarcodeBean;
 import com.zzz.webscanf.model.Wares;
-import com.zzz.webscanf.model.DataBaseItem;
 import com.zzz.webscanf.R;
 import com.zzz.webscanf.ui.MainActivity;
 import com.zzz.webscanf.utils.ToastUtils;
@@ -115,11 +114,6 @@ public class BarcodeMsgDialog {
                         @Override
                         public void accept(LCObject lcObject) throws Exception {
                             ToastUtils.showToast("保存成功");
-                            DataBaseItem dataBaseItem = DataBaseItem.getInstant(wares);
-                            dataBaseItem.setScan_num(wares.scan_num);
-                            dataBaseItem.setName(wares.name);
-                            dataBaseItem.setPrice(wares.price);
-                            dataBaseItem.save();
                         }
                     }, new Consumer<Throwable>() {
                         @Override

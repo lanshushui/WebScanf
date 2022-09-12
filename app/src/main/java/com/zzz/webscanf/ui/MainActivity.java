@@ -86,9 +86,9 @@ public class MainActivity extends BaseActivity implements ZXingScannerView.Resul
         final String scan_num=result.getText();
         LCQuery<Wares> query = new LCQuery<>("Wares");
         query.whereEqualTo("scan_num", scan_num);
-        query.findInBackground().subscribe(new Observer<List<Wares>>() {
-            public void onSubscribe(Disposable disposable) {}
-            public void onNext(List<Wares> list) {
+        query.findInBackground().subscribe(new Consumer<List<Wares>>() {
+            @Override
+            public void accept(List<Wares> list) throws Exception {
                 if(list.size()==0){
                     Wares wares =new Wares();
                     wares.setScan_num(scan_num);
@@ -108,11 +108,12 @@ public class MainActivity extends BaseActivity implements ZXingScannerView.Resul
                     }
                 }
             }
-            public void onError(Throwable throwable) {
+        }, new Consumer<Throwable>() {
+            @Override
+            public void accept(Throwable throwable) throws Exception {
                 ToastUtils.showToast("访问错误");
                 askRestart();
             }
-            public void onComplete() {}
         });
     }
     //被调用接口

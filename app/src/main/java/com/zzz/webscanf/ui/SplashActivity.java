@@ -14,18 +14,10 @@ import android.view.WindowManager;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.widget.ImageView;
-import android.widget.Toast;
-
-import com.zzz.webscanf.Global.MyApplication;
 import com.zzz.webscanf.R;
-import com.zzz.webscanf.model.Wares;
-import com.zzz.webscanf.model.DataBaseItem;
 import com.zzz.webscanf.utils.ToastUtils;
 
 
-import org.litepal.LitePal;
-
-import java.util.List;
 
 
 public class SplashActivity extends BaseActivity {
@@ -34,7 +26,6 @@ public class SplashActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setStatusBarViewVisiable(View.GONE);
-        LitePal.getDatabase();
         if(Build.VERSION.SDK_INT>=21){
             View decorView=getWindow().getDecorView();
             decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN|View.SYSTEM_UI_FLAG_LAYOUT_STABLE| View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
@@ -63,7 +54,6 @@ public class SplashActivity extends BaseActivity {
                         || ContextCompat.checkSelfPermission(SplashActivity.this, Manifest.permission.READ_PHONE_STATE)!= PackageManager.PERMISSION_GRANTED){
                     ActivityCompat.requestPermissions(SplashActivity.this,new String[]{Manifest.permission.CAMERA,Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.READ_PHONE_STATE},0);
                 }else {
-                    MyApplication.updateDataBase();
                     Intent intent=new Intent(SplashActivity.this, MainActivity.class);
                     startActivity(intent);
                     finish();
@@ -84,7 +74,6 @@ public class SplashActivity extends BaseActivity {
             case 0:
                 if(grantResults.length>0&&grantResults[0]==PackageManager.PERMISSION_GRANTED&&grantResults[1]==PackageManager.PERMISSION_GRANTED
                         &&grantResults[2]==PackageManager.PERMISSION_GRANTED){
-                    MyApplication.updateDataBase();
                     Intent intent=new Intent(SplashActivity.this,MainActivity.class);
                     startActivity(intent);
                     finish();
@@ -96,6 +85,5 @@ public class SplashActivity extends BaseActivity {
             default:
 
         }
-
     }
 }
