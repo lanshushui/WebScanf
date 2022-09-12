@@ -1,5 +1,6 @@
 package com.zzz.webscanf.ui;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
@@ -7,7 +8,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.view.View;
-import android.widget.Toast;
 
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.Result;
@@ -19,10 +19,11 @@ import com.zzz.webscanf.utils.ToastUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-import cn.bmob.v3.BmobQuery;
-import cn.bmob.v3.exception.BmobException;
-import cn.bmob.v3.listener.FindListener;
-import cn.bmob.v3.listener.UpdateListener;
+import cn.leancloud.LCQuery;
+import cn.leancloud.types.LCNull;
+import io.reactivex.Observer;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
 import me.dm7.barcodescanner.zxing.ZXingScannerView;
 
 
@@ -79,40 +80,39 @@ public class MainActivity extends BaseActivity implements ZXingScannerView.Resul
         zingScanner.stopCamera();
     }
 
-
+    @SuppressLint("CheckResult")
     @Override
     public void handleResult(Result result) {
         final String scan_num=result.getText();
-        BmobQuery<Wares> items=new BmobQuery<Wares>();
-        items.addWhereEqualTo("scan_num",scan_num);
-        items.findObjects(new FindListener<Wares>() {
-            @Override
-            public void done(List<Wares> list, BmobException e) {
-                if(e==null){
-                    if(list.size()==0){
-                        Wares wares =new Wares();
-                        wares.setScan_num(scan_num);
-                        new BarcodeMsgDialog(MainActivity.this, wares);
-                    }else {
-                        Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-                        Ringtone r = RingtoneManager.getRingtone(MainActivity.this, notification);
-                        r.play();
-                        new BarcodeMsgDialog(MainActivity.this,list.get(0));
-                        while (list.size()!=1){
-                            list.get(1).delete(new UpdateListener() {
-                                @Override
-                                public void done(BmobException e) {
-
-                                }
-                            });
-                            list.remove(1);
-                        }
-                    }
+        LCQuery<Wares> query = new LCQuery<>("Wares");
+        query.whereEqualTo("scan_num", scan_num);
+        query.findInBackground().subscribe(new Observer<List<Wares>>() {
+            public void onSubscribe(Disposable disposable) {}
+            public void onNext(List<Wares> list) {
+                if(list.size()==0){
+                    Wares wares =new Wares();
+                    wares.setScan_num(scan_num);
+                    new BarcodeMsgDialog(MainActivity.this, wares);
                 }else {
-                    ToastUtils.showToast("访问错误");
-                    askRestart();
+                    Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+                    Ringtone r = RingtoneManager.getRingtone(MainActivity.this, notification);
+                    r.play();
+                    new BarcodeMsgDialog(MainActivity.this,list.get(0));
+                    while (list.size()!=1){
+                        list.get(1).deleteInBackground().subscribe(new Consumer<LCNull>() {
+                            @Override
+                            public void accept(LCNull lcNull) throws Exception {
+                            }
+                        });
+                        list.remove(1);
+                    }
                 }
             }
+            public void onError(Throwable throwable) {
+                ToastUtils.showToast("访问错误");
+                askRestart();
+            }
+            public void onComplete() {}
         });
     }
     //被调用接口

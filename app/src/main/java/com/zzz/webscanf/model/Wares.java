@@ -2,14 +2,21 @@ package com.zzz.webscanf.model;
 
 
 import android.text.TextUtils;
+import android.util.Log;
 
-import cn.bmob.v3.BmobObject;
+import cn.leancloud.LCObject;
+import cn.leancloud.annotation.LCClassName;
+import io.reactivex.Observable;
 
 /**
  * Created by 懒鼠睡zzz on 2017/10/15.
  */
+@LCClassName("Wares")
+public class Wares extends LCObject {
 
-public class Wares extends BmobObject  {
+    public Wares(){
+        super("Wares");
+    }
     public  String name;
     public  double price;
     public  String  scan_num;
@@ -39,5 +46,28 @@ public class Wares extends BmobObject  {
 
     public void setPrice(double price) {
         this.price = price;
+    }
+
+    @Override
+    protected void resetByRawData(LCObject LCObject) {
+        super.resetByRawData(LCObject);
+        try {
+            if(serverData.size()!=0){
+                name=serverData.get("name").toString();
+                price=Double.parseDouble(serverData.get("price").toString());
+                scan_num=serverData.get("scan_num").toString();
+            }
+        }catch (Exception e){
+            Log.e("Wares",e.toString());
+        }
+    }
+
+    @Override
+    public Observable<? extends LCObject> saveInBackground() {
+        put("name",name);
+        put("price",price+"");
+        put("scan_num",scan_num);
+        return super.saveInBackground();
+
     }
 }

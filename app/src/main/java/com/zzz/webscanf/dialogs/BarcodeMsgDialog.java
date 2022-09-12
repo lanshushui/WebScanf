@@ -1,5 +1,6 @@
 package com.zzz.webscanf.dialogs;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
@@ -11,10 +12,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.zzz.webscanf.ApiManager;
 import com.zzz.webscanf.BarcodeApi;
@@ -25,10 +24,8 @@ import com.zzz.webscanf.R;
 import com.zzz.webscanf.ui.MainActivity;
 import com.zzz.webscanf.utils.ToastUtils;
 import com.zzz.webscanf.utils.UiUtils;
-
-import cn.bmob.v3.exception.BmobException;
-import cn.bmob.v3.listener.SaveListener;
-import cn.bmob.v3.listener.UpdateListener;
+import cn.leancloud.LCObject;
+import io.reactivex.functions.Consumer;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -97,6 +94,7 @@ public class BarcodeMsgDialog {
             });
         }
         contentView.findViewById(R.id.sureView).setOnClickListener(new View.OnClickListener() {
+            @SuppressLint("CheckResult")
             @Override
             public void onClick(View view) {
                 String priceStr=price.getText().toString();
@@ -111,41 +109,25 @@ public class BarcodeMsgDialog {
                 }
                 dialog.dismiss();
                 if(wares.price==Double.valueOf(priceStr)&&TextUtils.equals(wares.name,nameStr)) return;
-                if(!Wares.isLog(wares)){
                     wares.setName(nameStr);
                     wares.setPrice(Double.valueOf(priceStr));
-                    wares.save(new SaveListener<String>() {
+                    wares.saveInBackground().subscribe(new Consumer<LCObject>() {
                         @Override
-                        public void done(String s, BmobException e) {
-                            if(e==null) {
-                                ToastUtils.showToast("保存成功");
-                                DataBaseItem dataBaseItem = DataBaseItem.getInstant(wares);
-                                dataBaseItem.setName(wares.name);
-                                dataBaseItem.setPrice(wares.price);
-                                dataBaseItem.save();
-                            }else {
-                                ToastUtils.showToast("保存失败");
-                            }
+                        public void accept(LCObject lcObject) throws Exception {
+                            ToastUtils.showToast("保存成功");
+                            DataBaseItem dataBaseItem = DataBaseItem.getInstant(wares);
+                            dataBaseItem.setScan_num(wares.scan_num);
+                            dataBaseItem.setName(wares.name);
+                            dataBaseItem.setPrice(wares.price);
+                            dataBaseItem.save();
+                        }
+                    }, new Consumer<Throwable>() {
+                        @Override
+                        public void accept(Throwable throwable) throws Exception {
+                            ToastUtils.showToast("保存失败");
                         }
                     });
-                }else{
-                    wares.setName(nameStr);
-                    wares.setPrice(Double.valueOf(priceStr));
-                    wares.update(new UpdateListener() {
-                        @Override
-                        public void done(BmobException e) {
-                            if(e==null) {
-                                ToastUtils.showToast("保存成功");
-                                DataBaseItem dataBaseItem = DataBaseItem.getInstant(wares);
-                                dataBaseItem.setName(wares.name);
-                                dataBaseItem.setPrice(wares.price);
-                                dataBaseItem.save();
-                            }else {
-                                ToastUtils.showToast("保存失败");
-                            }
-                        }
-                    });
-                }
+
             }
         });
         contentView.findViewById(R.id.cancelView).setOnClickListener(new View.OnClickListener() {

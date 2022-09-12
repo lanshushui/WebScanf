@@ -45,10 +45,6 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/provider_paths"/>
         </provider>
-        <provider
-            android:name="cn.bmob.v3.util.BmobContentProvider"
-            android:authorities="com.zzz.webscanf.BmobContentProvider">
-        </provider>
 
     </application>
 

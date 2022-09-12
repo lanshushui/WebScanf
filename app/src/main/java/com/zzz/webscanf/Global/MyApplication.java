@@ -5,7 +5,6 @@ import android.content.Context;
 import android.os.Handler;
 
 import com.tencent.bugly.Bugly;
-import com.tencent.bugly.crashreport.CrashReport;
 import com.zzz.webscanf.model.DataBaseItem;
 import com.zzz.webscanf.model.Wares;
 import com.zzz.webscanf.utils.ToastUtils;
@@ -14,11 +13,12 @@ import org.litepal.LitePal;
 import org.litepal.crud.DataSupport;
 
 import java.util.List;
-
-import cn.bmob.v3.Bmob;
-import cn.bmob.v3.BmobQuery;
-import cn.bmob.v3.exception.BmobException;
-import cn.bmob.v3.listener.FindListener;
+import cn.leancloud.LCObject;
+import cn.leancloud.LCQuery;
+import cn.leancloud.LeanCloud;
+import io.reactivex.Observer;
+import io.reactivex.annotations.NonNull;
+import io.reactivex.disposables.Disposable;
 
 /**
  * Created by 懒鼠睡zzz on 2017/10/15.
@@ -32,7 +32,9 @@ public class MyApplication extends Application {
     public void onCreate() {
         super.onCreate();
         Bugly.init(getApplicationContext(), "ec0cc0d600", false);
-        Bmob.initialize(this,"26141dcbac0c99a7ac9729c1a6731ea5");
+        LeanCloud.initialize(this, "OYtg69HFMLtlz8I7HK3pDFcs-gzGzoHsz", "p0qic6oI2yiakS9RnOPf9mYP",
+                "https://oytg69hf.lc-cn-n1-shared.com");
+        LCObject.registerSubclass(Wares.class);
         mContext=getApplicationContext();
         mHandle=new Handler();
         LitePal.initialize(mContext);
@@ -51,15 +53,13 @@ public class MyApplication extends Application {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                BmobQuery<Wares> query = new BmobQuery<Wares>();
-                query.setLimit(500);
-                query.findObjects(new FindListener<Wares>() {
+                new LCQuery<Wares>("Wares")
+                        .limit(1000)
+                        .findInBackground().subscribe(new Observer<List<Wares>>() {
+                    public void onSubscribe(Disposable disposable) {}
+
                     @Override
-                    public void done(List<Wares> list, BmobException e) {
-                        if(e!=null||list==null||list.size()==0) {
-                            ToastUtils.showToast("更新数据失败");
-                            return;
-                        }
+                    public void onNext(@NonNull List<Wares> list) {
                         DataSupport.deleteAll(DataBaseItem.class);
                         for(Wares wares :list){
                             DataBaseItem first=DataBaseItem.getInstant(wares);
@@ -70,6 +70,8 @@ public class MyApplication extends Application {
                         }
                         ToastUtils.showToast("更新数据成功");
                     }
+                    public void onError(Throwable throwable) {}
+                    public void onComplete() {}
                 });
             }
         }).start();

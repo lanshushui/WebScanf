@@ -24,14 +24,8 @@ import com.zzz.webscanf.utils.ToastUtils;
 
 
 import org.litepal.LitePal;
-import org.litepal.crud.DataSupport;
 
 import java.util.List;
-
-import cn.bmob.v3.Bmob;
-import cn.bmob.v3.BmobQuery;
-import cn.bmob.v3.exception.BmobException;
-import cn.bmob.v3.listener.FindListener;
 
 
 public class SplashActivity extends BaseActivity {
@@ -40,7 +34,6 @@ public class SplashActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setStatusBarViewVisiable(View.GONE);
-        Bmob.initialize(this, "fa9d76fe5cbcaf8733ba77e2b981f4a5");
         LitePal.getDatabase();
         if(Build.VERSION.SDK_INT>=21){
             View decorView=getWindow().getDecorView();
@@ -91,25 +84,7 @@ public class SplashActivity extends BaseActivity {
             case 0:
                 if(grantResults.length>0&&grantResults[0]==PackageManager.PERMISSION_GRANTED&&grantResults[1]==PackageManager.PERMISSION_GRANTED
                         &&grantResults[2]==PackageManager.PERMISSION_GRANTED){
-                    new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            BmobQuery<Wares> query = new BmobQuery<Wares>();
-                            query.setLimit(500);
-                            query.findObjects(new FindListener<Wares>() {
-                                @Override
-                                public void done(List<Wares> list, BmobException e) {
-                                    for(Wares wares :list){
-                                        DataBaseItem first=DataBaseItem.getInstant(wares);
-                                        first.setScan_num(wares.scan_num);
-                                        first.setPrice(wares.price);
-                                        first.setName(wares.name);
-                                        first.save();
-                                    }
-                                }
-                            });
-                        }
-                    }).start();
+                    MyApplication.updateDataBase();
                     Intent intent=new Intent(SplashActivity.this,MainActivity.class);
                     startActivity(intent);
                     finish();

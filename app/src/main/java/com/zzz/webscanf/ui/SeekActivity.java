@@ -1,7 +1,9 @@
 package com.zzz.webscanf.ui;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.os.Bundle;
@@ -17,9 +19,6 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import com.zzz.webscanf.Global.MyApplication;
 import com.zzz.webscanf.R;
 import com.zzz.webscanf.model.Wares;
 import com.zzz.webscanf.model.DataBaseItem;
@@ -31,11 +30,12 @@ import org.litepal.crud.DataSupport;
 
 import java.util.Collections;
 import java.util.List;
-
-import cn.bmob.v3.BmobQuery;
-import cn.bmob.v3.exception.BmobException;
-import cn.bmob.v3.listener.FindListener;
-import cn.bmob.v3.listener.UpdateListener;
+import cn.leancloud.LCObject;
+import cn.leancloud.LCQuery;
+import cn.leancloud.types.LCNull;
+import io.reactivex.Observer;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
 
 public class SeekActivity extends BaseActivity {
     RecyclerView recyclerView;
@@ -158,33 +158,37 @@ public class SeekActivity extends BaseActivity {
          *
          * @param dataBaseItem
          */
+        @SuppressLint("CheckResult")
         private void updateData(final DataBaseItem dataBaseItem, final String name, final double price) {
-            BmobQuery<Wares> items = new BmobQuery<Wares>();
-            items.addWhereEqualTo("scan_num", dataBaseItem.scan_num);
-            items.findObjects(new FindListener<Wares>() {
-                @Override
-                public void done(List<Wares> list, BmobException e) {
-                    if (e != null||list.isEmpty()) {
-                        ToastUtils.showToast("修改失败");
-                    } else {
-                            Wares wares = list.get(0);
-                            wares.setName(name);
-                            wares.setPrice(price);
-                            wares.update(new UpdateListener() {
-                                @Override
-                                public void done(BmobException e) {
-                                    if (e == null) {
-                                        dataBaseItem.setName(name);
-                                        dataBaseItem.setPrice(price);
-                                        dataBaseItem.save();
-                                        ToastUtils.showToast("修改成功");
-                                    } else {
-                                        ToastUtils.showToast("修改失败");
-                                    }
-                                }
-                            });
+            LCQuery<Wares> query = new LCQuery<>("Wares");
+            query.whereEqualTo("scan_num", dataBaseItem.scan_num);
+            query.findInBackground().subscribe(new Observer<List<Wares>>() {
+                public void onSubscribe(Disposable disposable) {}
+                public void onNext(@NonNull List<Wares> list) {
+                    if(list.size()!=0){
+                        Wares wares = list.get(0);
+                        wares.setName(name);
+                        wares.setPrice(price);
+                        wares.saveInBackground().subscribe(new Consumer<LCObject>() {
+                            @Override
+                            public void accept(LCObject lcObject) throws Exception {
+                                dataBaseItem.setName(name);
+                                dataBaseItem.setPrice(price);
+                                dataBaseItem.save();
+                                ToastUtils.showToast("修改成功");
+                            }
+                        }, new Consumer<Throwable>() {
+                            @Override
+                            public void accept(Throwable throwable) throws Exception {
+                                ToastUtils.showToast("修改失败");
+                            }
+                        });
                     }
                 }
+                public void onError(Throwable throwable) {
+                    ToastUtils.showToast("访问错误");
+                }
+                public void onComplete() {}
             });
         }
 
@@ -193,29 +197,21 @@ public class SeekActivity extends BaseActivity {
             return datas.size();
         }
 
+        @SuppressLint("CheckResult")
         private void deleteData(final DataBaseItem dataBaseItem) {
-            BmobQuery<Wares> items = new BmobQuery<Wares>();
-            items.addWhereEqualTo("scan_num", dataBaseItem.scan_num);
-            items.findObjects(new FindListener<Wares>() {
+            LCQuery<Wares> query = new LCQuery<>("Wares");
+            query.whereEqualTo("scan_num", dataBaseItem.scan_num);
+            query.deleteAllInBackground().subscribe(new Consumer<LCNull>() {
                 @Override
-                public void done(List<Wares> list, BmobException e) {
-                    if(e!=null||list.isEmpty()){
-                        ToastUtils.showToast("删除失败");
-                    }else {
-                        list.get(0).delete(new UpdateListener() {
-                            @Override
-                            public void done(BmobException e) {
-                                if (e == null) {
-                                    dataBaseItem.delete();
-                                    datas.remove(dataBaseItem);
-                                    recyclerView.getAdapter().notifyDataSetChanged();
-                                    ToastUtils.showToast("删除成功");
-                                } else {
-                                    ToastUtils.showToast("删除失败");
-                                }
-                            }
-                        });
-                    }
+                public void accept(LCNull lcNull) throws Exception {
+                    ToastUtils.showToast("删除成功");
+                    datas.remove(dataBaseItem);
+                    notifyDataSetChanged();
+                }
+            }, new Consumer<Throwable>() {
+                @Override
+                public void accept(Throwable throwable) throws Exception {
+                    ToastUtils.showToast("删除失败");
                 }
             });
         }

@@ -7,7 +7,7 @@ android {
     buildToolsVersion '28.0.3'
     useLibrary 'org.apache.http.legacy'
     defaultConfig {
-        applicationId "com.zzz.webscanf"
+        applicationId "com.zzz.webscanf_leancloud"
         minSdkVersion 21
         targetSdkVersion 28
         versionCode 10
@@ -29,7 +29,14 @@ android {
             outputFileName = defaultConfig.applicationId  + "-v" + defaultConfig.versionName + "-" + defaultConfig.versionCode + ".apk";
         }
     }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
 
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
 }
 
 dependencies {
@@ -51,11 +58,12 @@ dependencies {
     implementation 'com.android.support:design:28.0.0'
     implementation 'org.litepal.android:core:1.6.1'
 
-    implementation 'io.github.bmob:android-sdk:3.8.13'
+    implementation 'cn.leancloud:storage-android:8.2.5'
+
     implementation 'io.reactivex.rxjava2:rxjava:2.2.8'
     implementation 'io.reactivex.rxjava2:rxandroid:2.1.1'
-    implementation 'com.squareup.okhttp3:okhttp:4.8.1'
-    implementation 'com.squareup.okio:okio:2.2.2'
+    //implementation 'com.squareup.okhttp3:okhttp:4.8.1'
+    //implementation 'com.squareup.okio:okio:2.2.2'
     implementation 'com.google.code.gson:gson:2.8.5'
 
 
