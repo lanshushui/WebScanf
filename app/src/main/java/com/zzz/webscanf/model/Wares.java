@@ -20,6 +20,7 @@ public class Wares extends LCObject {
     public  String name;
     public  double price;
     public  String  scan_num;
+    public long visitTime=0;
     public static boolean isLog(Wares wares){
         return !TextUtils.isEmpty(wares.getObjectId());
     }
@@ -55,6 +56,9 @@ public class Wares extends LCObject {
             if(serverData.size()!=0){
                 name=serverData.get("name").toString();
                 price=Double.parseDouble(serverData.get("price").toString());
+                if(serverData.get("visitTime")!=null){
+                    visitTime=Long.parseLong(serverData.get("visitTime").toString());
+                }
                 scan_num=serverData.get("scan_num").toString();
             }
         }catch (Exception e){
@@ -64,10 +68,31 @@ public class Wares extends LCObject {
 
     @Override
     public Observable<? extends LCObject> saveInBackground() {
+        visitTime=System.currentTimeMillis();
         put("name",name);
         put("price",price+"");
         put("scan_num",scan_num);
+        put("visitTime",visitTime);
         return super.saveInBackground();
+    }
 
+    public Observable<? extends LCObject> saveInBackgroundV2() {
+        visitTime=System.currentTimeMillis();
+        put("visitTime",visitTime);
+        return super.saveInBackground();
+    }
+
+    public String getCheckStr() {
+        if(!isLog(this)) return "";
+        if(visitTime==0) return "";
+        long diff=System.currentTimeMillis()-visitTime;
+        diff=diff/1000;
+        int day=(int)(diff/(60*60*24));
+        if(day==0) return "今日认证";
+        if(day>30){
+            int mouth=day/30;
+            return mouth+"月前认证";
+        }
+        return day+"天前认证";
     }
 }

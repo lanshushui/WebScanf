@@ -37,7 +37,7 @@ public class BarcodeMsgDialog {
     private Dialog dialog;
     private EditText code,name,price;
     private Context mContext;
-    private TextView sure,cancle;
+    private TextView sure,visitData;
     public BarcodeMsgDialog(Activity activity, final Wares wares){
         mContext=activity;
         dialog = new Dialog(activity, R.style.BottomDialog);
@@ -50,10 +50,23 @@ public class BarcodeMsgDialog {
         dialog.getWindow().setWindowAnimations(R.style.BottomDialog_Animation);
         dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
             @Override
+            @SuppressLint("CheckResult")
             public void onDismiss(DialogInterface dialogInterface) {
                 if(mContext instanceof MainActivity){
                     MainActivity mainActivity= (MainActivity) mContext;
                     mainActivity.askRestart();
+                    //更新查看时间
+                    if(Wares.isLog(wares)){
+                        wares.saveInBackgroundV2().subscribe(new Consumer<LCObject>() {
+                            @Override
+                            public void accept(LCObject lcObject) throws Exception {
+                            }
+                        }, new Consumer<Throwable>() {
+                            @Override
+                            public void accept(Throwable throwable) throws Exception {
+                            }
+                        });
+                    }
                 }
             }
         });
@@ -62,7 +75,8 @@ public class BarcodeMsgDialog {
         name=(EditText)contentView.findViewById(R.id.et_name);
         price=(EditText)contentView.findViewById(R.id.et_price);
         sure=contentView.findViewById(R.id.sure);
-        cancle=contentView.findViewById(R.id.cancel);
+        visitData=contentView.findViewById(R.id.visitData);
+        visitData.setText(wares.getCheckStr());
         if(!Wares.isLog(wares)){
             TextView tip=contentView.findViewById(R.id.tip);
             tip.setText("未录入");

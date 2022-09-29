@@ -6,15 +6,28 @@
     android:orientation="vertical"
     android:background="@drawable/dialog_barcode_bg"
     android:padding="20dp">
-    <TextView
-        android:id="@+id/tip"
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="已录入"
-        android:textColor="@android:color/holo_green_dark"
-        android:textSize="20sp"
-        android:gravity="center"
-        android:layout_marginBottom="30dp"/>
+        android:layout_marginBottom="30dp">
+        <TextView
+            android:id="@+id/tip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="已录入"
+            android:textColor="@android:color/holo_green_dark"
+            android:textSize="20sp"
+            android:gravity="center" />
+        <TextView
+            android:id="@+id/visitData"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:text="7日内认证"
+            android:alpha="0.7"/>
+    </RelativeLayout>
     <LinearLayout
         android:id="@+id/codeview"
         android:layout_width="match_parent"
