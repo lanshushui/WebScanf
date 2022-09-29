@@ -55,18 +55,6 @@ public class BarcodeMsgDialog {
                 if(mContext instanceof MainActivity){
                     MainActivity mainActivity= (MainActivity) mContext;
                     mainActivity.askRestart();
-                    //更新查看时间
-                    if(Wares.isLog(wares)){
-                        wares.saveInBackgroundV2().subscribe(new Consumer<LCObject>() {
-                            @Override
-                            public void accept(LCObject lcObject) throws Exception {
-                            }
-                        }, new Consumer<Throwable>() {
-                            @Override
-                            public void accept(Throwable throwable) throws Exception {
-                            }
-                        });
-                    }
                 }
             }
         });
@@ -112,6 +100,7 @@ public class BarcodeMsgDialog {
             public void onClick(View view) {
                 String priceStr=price.getText().toString();
                 String nameStr=name.getText().toString();
+                String scanNum=code.getText().toString();
                 if(TextUtils.isEmpty(nameStr)|| !UiUtils.isNumericzidai(priceStr)){
                     ToastUtils.showToast("数据错误");
                     return;
@@ -121,7 +110,7 @@ public class BarcodeMsgDialog {
                     manager.hideSoftInputFromWindow(dialog.getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
                 }
                 dialog.dismiss();
-                if(wares.price==Double.valueOf(priceStr)&&TextUtils.equals(wares.name,nameStr)) return;
+                wares.setScan_num(scanNum);
                     wares.setName(nameStr);
                     wares.setPrice(Double.valueOf(priceStr));
                     wares.saveInBackground().subscribe(new Consumer<LCObject>() {

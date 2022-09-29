@@ -76,12 +76,6 @@ public class Wares extends LCObject {
         return super.saveInBackground();
     }
 
-    public Observable<? extends LCObject> saveInBackgroundV2() {
-        visitTime=System.currentTimeMillis();
-        put("visitTime",visitTime);
-        return super.saveInBackground();
-    }
-
     public String getCheckStr() {
         if(!isLog(this)) return "";
         if(visitTime==0) return "";
