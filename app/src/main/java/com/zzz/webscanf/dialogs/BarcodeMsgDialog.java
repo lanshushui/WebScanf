@@ -82,10 +82,8 @@ public class BarcodeMsgDialog {
                 @Override
                 public void onResponse(Call<BarcodeBean> call, Response<BarcodeBean> response) {
                     BarcodeBean data = response.body();
-                    if(data==null||data.getCode()==0) return;
-                    name.setText("");
+                    if(data==null||data.getData()==null||data.getCode()==0) return;
                     name.setText(data.getData().getGoodsName());
-                    price.setText("");
                     price.setText(data.getData().getPrice());
                 }
                 @Override
